@@ -1,8 +1,7 @@
+import { Car } from './classes/index.ts';
+
 function main() {
-  const a = 1;
-  const b = 12312;
-
-  console.log(a + b);
+  const audi = new Car('AX 7777 EE', 'Audi', 'RS7', 2022);
+  console.log(audi);
 }
-
 main();
