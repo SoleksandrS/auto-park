@@ -9,8 +9,8 @@ interface IManageSystem {
   };
   addCar: (newCar: ICar) => void;
   registrationNewCustomer: (newCustomer: ICustomer) => void;
-  rentCar: (customer: ICustomer['phoneNumber'], car: ICar) => void;
-  returnCar: (customer: ICustomer['phoneNumber'], car: ICar) => void;
+  rentCar: (customer: ICustomer['phoneNumber'], numberSign: ICar['numberSign']) => void;
+  returnCar: (customer: ICustomer['phoneNumber'], numberSign: ICar['numberSign']) => void;
   searchCar: (
     mark?: ICar['mark'],
     model?: ICar['model'],
