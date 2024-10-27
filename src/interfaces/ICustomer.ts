@@ -1,7 +1,7 @@
 interface ICustomer {
   name: string;
   address: string;
-  phoneNumber: number;
+  phoneNumber: string;
 }
 
 export default ICustomer;
