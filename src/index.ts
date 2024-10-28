@@ -19,13 +19,8 @@ function main() {
 
   const system = new ManageSystem();
 
-  for (let i = 0; i < 3; i++) {
-    system.addCar(cars[i]);
-  }
-
-  for (let i = 0; i < 1; i++) {
-    system.registrationNewCustomer(customers[i]);
-  }
+  cars.forEach((car) => system.addCar(car));
+  customers.forEach((customer) => system.registrationNewCustomer(customer));
 
   console.log(system.bookedCars);
 

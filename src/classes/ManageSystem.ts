@@ -39,7 +39,7 @@ class ManageSystem implements IManageSystem {
 
     if (!this.bookedCars[customer]) throw new Error('Customer doesn`t have rented cars');
 
-    if (this.bookedCars[customer].findIndex((numSign) => numSign !== numberSign)) {
+    if (this.bookedCars[customer].findIndex((numSign) => numSign === numberSign) < 0) {
       throw new Error('Client didnt`t rent this car');
     }
 
