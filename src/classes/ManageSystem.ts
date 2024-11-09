@@ -2,11 +2,9 @@ import { IManageSystem } from '../interfaces/index.ts';
 import { Car, Customer } from './';
 
 class ManageSystem implements IManageSystem {
-  customers: Customer[] = [];
-  cars: Car[] = [];
-  bookedCars: {
-    [key: string]: Car['numberSign'][];
-  } = {};
+  customers: Customer[];
+  cars: Car[];
+  bookedCars: { [key: string]: Car['numberSign'][] } = {};
 
   constructor(customers: Customer[] = [], cars: Car[] = []) {
     this.customers = customers;
@@ -45,7 +43,7 @@ class ManageSystem implements IManageSystem {
     if (!this.bookedCars[customer]) throw new Error('Customer doesn`t have rented cars');
 
     if (this.bookedCars[customer].findIndex((numSign) => numSign === numberSign) < 0) {
-      throw new Error('Client didnt`t rent this car');
+      throw new Error('Client didn`t rent this car');
     }
 
     this.bookedCars[customer] = this.bookedCars[customer].filter(
