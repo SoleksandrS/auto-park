@@ -8,6 +8,11 @@ class ManageSystem implements IManageSystem {
     [key: string]: Car['numberSign'][];
   } = {};
 
+  constructor(customers: Customer[] = [], cars: Car[] = []) {
+    this.customers = customers;
+    this.cars = cars;
+  }
+
   addCar(newCar: Car) {
     this.cars.push(newCar);
   }
