@@ -1,7 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import ManageSystem from '../classes/ManageSystem';
 import { Car, Customer } from '../classes';
+import TestCarWrapper from './test-classes/TestCarWrapper';
+import TestCustomerWrapper from './test-classes/TestCustomerWrapper';
+
+jest.mock('../classes/Car', () => {
+  return jest
+    .fn()
+    .mockImplementation((numberSign: string, mark: string, model: string, year: number) => ({
+      numberSign,
+      mark,
+      model,
+      year,
+      availabilityStatus: true
+    }));
+});
+
+jest.mock('../classes/Customer', () => {
+  return jest.fn().mockImplementation((name: string, address: string, phoneNumber: string) => ({
+    name,
+    address,
+    phoneNumber
+  }));
+});
 
 describe('ManageSystem', () => {
   let manageSystem: ManageSystem;
@@ -9,6 +29,7 @@ describe('ManageSystem', () => {
   let customer1: Customer, customer2: Customer;
 
   beforeEach(() => {
+    // Creating mocked instances directly
     car1 = new Car('ABC123', 'Toyota', 'Corolla', 2021);
     car2 = new Car('DEF456', 'Honda', 'Civic', 2020);
 
@@ -18,15 +39,22 @@ describe('ManageSystem', () => {
     manageSystem = new ManageSystem([customer1, customer2], [car1, car2]);
   });
 
+  test('should create ManageSystem instance with customers and cars', () => {
+    const newManageSystem = new ManageSystem();
+
+    expect(newManageSystem.customers.length).toBe(0);
+    expect(newManageSystem.cars.length).toBe(0);
+  });
+
   test('adds a new car', () => {
-    const newCar: Car = new Car('XYZ789', 'Ford', 'Focus', 2019);
+    const newCar = TestCarWrapper.createTestCar('LMN123');
     manageSystem.addCar(newCar);
 
     expect(manageSystem.cars).toContain(newCar);
   });
 
   test('registers a new customer', () => {
-    const newCustomer: Customer = new Customer('Alice Johnson', 'Girshmana 1', '+380993333333');
+    const newCustomer = TestCustomerWrapper.createTestCustomer('+380993333333');
     manageSystem.registrationNewCustomer(newCustomer);
 
     expect(manageSystem.customers).toContain(newCustomer);
@@ -36,7 +64,7 @@ describe('ManageSystem', () => {
     manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
 
     expect(manageSystem.bookedCars[customer1.phoneNumber]).toContain(car1.numberSign);
-    expect(car1.availabilityStatus).toBe(false);
+    expect(car1.availabilityStatus).toBe(false); // Mocked availability status
   });
 
   test('throws an error when renting a non-existent car', () => {
@@ -45,18 +73,44 @@ describe('ManageSystem', () => {
     }).toThrow('Car not found');
   });
 
+  test('throws an error when has a non-existent customer', () => {
+    expect(() => {
+      manageSystem.rentCar('NONEXISTENT', car1.numberSign);
+    }).toThrow('Customer not found');
+  });
+
+  test('throws an error when car is rented already', () => {
+    manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
+    expect(() => {
+      manageSystem.rentCar(customer2.phoneNumber, car1.numberSign);
+    }).toThrow('Car is rented already');
+  });
+
   test('returns a car from a customer', () => {
     manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
     manageSystem.returnCar(customer1.phoneNumber, car1.numberSign);
 
     expect(manageSystem.bookedCars[customer1.phoneNumber]).not.toContain(car1.numberSign);
-    expect(car1.availabilityStatus).toBe(true);
+    expect(car1.availabilityStatus).toBe(true); // Mocked availability status
   });
 
-  test('throws an error when returning a car that is not rented', () => {
+  test('throws an error when returning a car that does not exist', () => {
+    expect(() => {
+      manageSystem.returnCar(customer1.phoneNumber, 'NONEXISTENT');
+    }).toThrow('Car not found');
+  });
+
+  test("throws an error when returning a car when customer hasn't rented one", () => {
     expect(() => {
       manageSystem.returnCar(customer1.phoneNumber, car1.numberSign);
     }).toThrow('Customer doesn`t have rented cars');
+  });
+
+  test('throws an error when returning a car that is not rented', () => {
+    manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
+    expect(() => {
+      manageSystem.returnCar(customer1.phoneNumber, car2.numberSign);
+    }).toThrow('Client didn`t rent this car');
   });
 
   test('searches for cars by mark', () => {
