@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import ManageSystem from '../classes/ManageSystem';
 import { Car, Customer } from '../classes';
+import TestCarWrapper from './test-classes/TestCarWrapper';
+import TestCustomerWrapper from './test-classes/TestCustomerWrapper';
 
 describe('ManageSystem', () => {
   let manageSystem: ManageSystem;
@@ -18,15 +18,22 @@ describe('ManageSystem', () => {
     manageSystem = new ManageSystem([customer1, customer2], [car1, car2]);
   });
 
+  test('should create ManageSystem instance with customers and cars', () => {
+    const newManageSystem = new ManageSystem();
+
+    expect(newManageSystem.customers.length).toBe(0);
+    expect(newManageSystem.cars.length).toBe(0);
+  });
+
   test('adds a new car', () => {
-    const newCar: Car = new Car('XYZ789', 'Ford', 'Focus', 2019);
+    const newCar = TestCarWrapper.createTestCar('LMN123');
     manageSystem.addCar(newCar);
 
     expect(manageSystem.cars).toContain(newCar);
   });
 
   test('registers a new customer', () => {
-    const newCustomer: Customer = new Customer('Alice Johnson', 'Girshmana 1', '+380993333333');
+    const newCustomer = TestCustomerWrapper.createTestCustomer('+380993333333');
     manageSystem.registrationNewCustomer(newCustomer);
 
     expect(manageSystem.customers).toContain(newCustomer);
@@ -45,6 +52,19 @@ describe('ManageSystem', () => {
     }).toThrow('Car not found');
   });
 
+  test('throws an error when has a non-existent customer', () => {
+    expect(() => {
+      manageSystem.rentCar('NONEXISTENT', car1.numberSign);
+    }).toThrow('Customer not found');
+  });
+
+  test('throws an error when car is rented already', () => {
+    expect(() => {
+      manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
+      manageSystem.rentCar(customer2.phoneNumber, car1.numberSign);
+    }).toThrow('Car is rented already');
+  });
+
   test('returns a car from a customer', () => {
     manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
     manageSystem.returnCar(customer1.phoneNumber, car1.numberSign);
@@ -53,10 +73,23 @@ describe('ManageSystem', () => {
     expect(car1.availabilityStatus).toBe(true);
   });
 
-  test('throws an error when returning a car that is not rented', () => {
+  test('throws an error when returning a car that is not exist', () => {
+    expect(() => {
+      manageSystem.returnCar(customer1.phoneNumber, 'NONEXISTENT');
+    }).toThrow('Car not found');
+  });
+
+  test('throws an error when returning a car when customer haven`t rent car', () => {
     expect(() => {
       manageSystem.returnCar(customer1.phoneNumber, car1.numberSign);
     }).toThrow('Customer doesn`t have rented cars');
+  });
+
+  test('throws an error when returning a car that is not rented', () => {
+    expect(() => {
+      manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
+      manageSystem.returnCar(customer1.phoneNumber, car2.numberSign);
+    }).toThrow('Client didn`t rent this car');
   });
 
   test('searches for cars by mark', () => {
