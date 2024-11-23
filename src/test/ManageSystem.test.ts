@@ -3,12 +3,33 @@ import { Car, Customer } from '../classes';
 import TestCarWrapper from './test-classes/TestCarWrapper';
 import TestCustomerWrapper from './test-classes/TestCustomerWrapper';
 
+jest.mock('../classes/Car', () => {
+  return jest
+    .fn()
+    .mockImplementation((numberSign: string, mark: string, model: string, year: number) => ({
+      numberSign,
+      mark,
+      model,
+      year,
+      availabilityStatus: true
+    }));
+});
+
+jest.mock('../classes/Customer', () => {
+  return jest.fn().mockImplementation((name: string, address: string, phoneNumber: string) => ({
+    name,
+    address,
+    phoneNumber
+  }));
+});
+
 describe('ManageSystem', () => {
   let manageSystem: ManageSystem;
   let car1: Car, car2: Car;
   let customer1: Customer, customer2: Customer;
 
   beforeEach(() => {
+    // Creating mocked instances directly
     car1 = new Car('ABC123', 'Toyota', 'Corolla', 2021);
     car2 = new Car('DEF456', 'Honda', 'Civic', 2020);
 
@@ -43,7 +64,7 @@ describe('ManageSystem', () => {
     manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
 
     expect(manageSystem.bookedCars[customer1.phoneNumber]).toContain(car1.numberSign);
-    expect(car1.availabilityStatus).toBe(false);
+    expect(car1.availabilityStatus).toBe(false); // Mocked availability status
   });
 
   test('throws an error when renting a non-existent car', () => {
@@ -59,8 +80,8 @@ describe('ManageSystem', () => {
   });
 
   test('throws an error when car is rented already', () => {
+    manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
     expect(() => {
-      manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
       manageSystem.rentCar(customer2.phoneNumber, car1.numberSign);
     }).toThrow('Car is rented already');
   });
@@ -70,24 +91,24 @@ describe('ManageSystem', () => {
     manageSystem.returnCar(customer1.phoneNumber, car1.numberSign);
 
     expect(manageSystem.bookedCars[customer1.phoneNumber]).not.toContain(car1.numberSign);
-    expect(car1.availabilityStatus).toBe(true);
+    expect(car1.availabilityStatus).toBe(true); // Mocked availability status
   });
 
-  test('throws an error when returning a car that is not exist', () => {
+  test('throws an error when returning a car that does not exist', () => {
     expect(() => {
       manageSystem.returnCar(customer1.phoneNumber, 'NONEXISTENT');
     }).toThrow('Car not found');
   });
 
-  test('throws an error when returning a car when customer haven`t rent car', () => {
+  test("throws an error when returning a car when customer hasn't rented one", () => {
     expect(() => {
       manageSystem.returnCar(customer1.phoneNumber, car1.numberSign);
     }).toThrow('Customer doesn`t have rented cars');
   });
 
   test('throws an error when returning a car that is not rented', () => {
+    manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
     expect(() => {
-      manageSystem.rentCar(customer1.phoneNumber, car1.numberSign);
       manageSystem.returnCar(customer1.phoneNumber, car2.numberSign);
     }).toThrow('Client didn`t rent this car');
   });
